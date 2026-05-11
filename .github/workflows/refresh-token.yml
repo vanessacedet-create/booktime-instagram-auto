@@ -1,0 +1,35 @@
+name: Renovar token do Instagram
+
+# Roda todo dia 1º do mês, às 9h UTC (6h em Brasília).
+# Também pode ser executado manualmente pelo botão "Run workflow".
+on:
+  schedule:
+    - cron: "0 9 1 * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Renovar token
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          # Esse precisa ser um PAT (Personal Access Token) com permissão
+          # "Secrets" — write, porque o GITHUB_TOKEN padrão não pode atualizar
+          # secrets do repo. Veja o README pra como criar.
+          GH_PAT_FOR_SECRETS: ${{ secrets.GH_PAT_FOR_SECRETS }}
+        run: python scripts/refresh_token.py
